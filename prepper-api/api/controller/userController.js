@@ -1,7 +1,7 @@
 import { User } from "../model/user.js";
 import 'dotenv/config';
 import bcrypt from "bcryptjs"; // encryption library for user password
-import jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken" // enables jwt authentication;
 
 async function signup(req, res) {
     try {
@@ -56,7 +56,6 @@ async function login(req, res) {
 
 async function logout(req, res) {
     try {
-
         res.clearCookie("authorize");
         res.sendStatus(200);
     }

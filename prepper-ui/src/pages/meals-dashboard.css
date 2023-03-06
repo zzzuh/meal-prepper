@@ -1,0 +1,14 @@
+.dashboard {
+    padding: 25px;
+    background-color: #212121;
+    color: white;
+    font-size: 25px;
+}
+
+.center {
+    text-align: center;
+}
+
+.grid-container {
+    display: inline;
+}
