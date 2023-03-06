@@ -24,33 +24,52 @@ async function signup(req, res) {
 }
 
 async function login(req, res) {
-    const username = req.body.username;
-    const password = req.body.password;
+    try {
+        const username = req.body.username;
+        const password = req.body.password;
 
-    const foundUser = await User.findOne({
-        username: username
-    });
-    if (!foundUser) {
-        res.sendStatus(403);
+        const foundUser = await User.findOne({ username: username });
+        if (!foundUser) {
+            return res.sendStatus(403);
+        }
+
+        const passwordMatch = bcrypt.compareSync(password, foundUser.password);
+        if (!passwordMatch) {
+            return res.sendStatus(403);
+        }
+
+        const exp = Date.now() + 1000 * 60 * 60 * 24 * 30;
+        const token = jwt.sign({sub: foundUser._id, exp}, process.env.SECRET);
+
+        res.cookie("authorize", token, {
+            expires: new Date(exp),
+            httpOnly: true,
+            sameSite: 'lax'
+        });
+
+        res.sendStatus(200);
     }
-
-    const passwordMatch = bcrypt.compareSync(password, foundUser.password);
-    if (!passwordMatch) {
-        res.sendStatus(403);
+    catch(err) {
+        res.sendStatus(404);
     }
-
-    const exp = Date.now() + 1000 * 60 * 60 * 24 * 30;
-    const token = jwt.sign({sub: foundUser._id, exp: exp}, process.env.SECRET);
-
-    res.send(token);
 }
 
 async function logout(req, res) {}
+
+function checkAuth(req, res) {
+    try {
+        res.sendStatus(200);
+    }
+    catch (err) {
+        res.sendStatus(403);
+    }
+}
 
 let userController = {
     signup,
     login,
     logout,
+    checkAuth
 }
 
 export default userController;

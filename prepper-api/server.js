@@ -3,12 +3,16 @@ import 'dotenv/config';
 
 // dependencies
 import express from 'express';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import meals from './api/router/MealRouter.js';
 import users from './api/router/UserRouter.js';
 import { connectDb } from './config/database.js';
 
 // create express app
 const app = express();
+app.use(cors());
+app.use(cookieParser());
 app.use(express.json());
 
 // connects to database
