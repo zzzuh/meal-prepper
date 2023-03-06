@@ -54,7 +54,16 @@ async function login(req, res) {
     }
 }
 
-async function logout(req, res) {}
+async function logout(req, res) {
+    try {
+
+        res.clearCookie("authorize");
+        res.sendStatus(200);
+    }
+    catch (err) {
+        res.sendStatus(403);
+    }
+}
 
 function checkAuth(req, res) {
     try {
