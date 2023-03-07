@@ -1,6 +1,7 @@
 .mealCard {
     box-sizing: border-box;
     width: 190px;
+    margin:5px;
     height: 254px;
     background: rgba(217, 217, 217, 0.58);
     border: 1px solid white;
