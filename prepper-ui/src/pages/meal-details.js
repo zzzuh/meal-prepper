@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom"
+import { Link, useParams } from "react-router-dom"
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -8,8 +8,10 @@ export default function Detail() {
 
     const url = `http://localhost:5000/meals/${id}`;
 
-    useEffect(() => {
-        getMeal();
+    useEffect(async () => {
+        const res = await axios.get(`http://localhost:5000/meals/${id}`);
+
+        setMeal(res.data.meal);
     }, [])
 
     const [meal, setMeal] = useState({
@@ -17,26 +19,35 @@ export default function Detail() {
         recipe:"",
     });
 
-    const [mode, setMode] = useState('display');
+    const handleNameChange = async (e) => {
+        const {name, value} = e.target;
 
-    const getMeal = async () => {
-        const res = await axios.get(url);
+        setMeal({[name]: value});
+    }
 
-        setMeal(res.data.meal);
+    const handleRecipeChange = (e) => {
+        const {recipe, value} = e.target;
+
+        setMeal({[recipe]: value});
+    }
+
+    const updateMeal = async () => {
+        await axios.put(url, meal);
     }
 
 
 
     return (<div>
         <h1> Detail for {meal.name} </h1>
-        {mode === 'display' ? (
-            <div>
-                <p>Name: {meal.name} </p>
-                <p>Recipe: {meal.recipe} </p>
-            </div>
-        ) : (
-            <>
-            </>
-        )}
+        <form onSubmit={updateMeal}>
+            Name:
+            <input name="name" value={meal.name} onChange={handleNameChange}/>
+            Recipe:
+            <textarea name="recipe" value={meal.recipe} onChange={handleRecipeChange} />
+            <button type="submit"> Save </button>
+            <Link to="/meals">
+                <button> Back </button>
+            </Link>
+        </form>
     </div>)
 }
