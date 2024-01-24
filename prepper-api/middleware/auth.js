@@ -1,31 +1,19 @@
-import jwt from 'jsonwebtoken';
-import { User } from '../api/model/user.js';
-import 'dotenv/config';
+const jwt = require("jsonwebtoken");
+const dotenv = require('dotenv').config();
 
-export async function auth(req, res, next) {
-    try {
-        // finds jwt token from cookie
-        const token = req.cookies.authorize;
+const auth =  async (req, res, next) => {
+    const token = req.cookies.token;
 
-        // decodes the token
-        const decoded = jwt.verify(token, process.env.SECRET);
-
-        //check if the token is expired
-        if (Date.now() > decoded.exp) return res.sendStatus(403);
-
-        // find the user from the token
-        const user = await User.findById(decoded.sub);
-
-        // check if no user was found
-        if (!user) return res.sendStatus(401);
-
-        // sets the user in request to the found in cookie
-        req.user = user;
-
-        // proceeds
-        next();
+    if (!token) {
+        res.status(404).send("Access denied");
     }
-    catch (err) {
-        return res.sendStatus(401);
+    try {
+        const verify = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = verify;
+        next();        
+    } catch (error) {
+        res.status(404).send("Invalid token");
     }
 }
+
+export default auth;
