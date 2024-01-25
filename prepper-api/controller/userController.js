@@ -1,7 +1,7 @@
-const dotenv = require("dotenv").config();
-const bcrypt = require("bcrypt")
-const jwt = require("jsonwebtoken");
-const pool = require("../config/database");
+import dotenv from "dotenv/config.js";
+import bcrypt from "bcrypt";
+import jwt from 'jsonwebtoken';
+import pool from "../config/database.js";
 
 const signup = async (req, res) => {
     try {
@@ -12,9 +12,9 @@ const signup = async (req, res) => {
             return;
         }
 
-        const user = await pool.query("SELECT * FROM user WHERE username = $1", [data.username]);
+        const user = await pool.query("SELECT * FROM users WHERE username = $1", [data.username]);
 
-        if (user.row.length !== 0) {
+        if (user.rows.length !== 0) {
             res.status(404).send("Username already exists");
             return;
         }
@@ -22,7 +22,7 @@ const signup = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashPassword = await bcrypt.hash(data.password, salt);
 
-        const registeredUser = await pool.query("INSERT INTO user (username, password, picture) VALUES($1, $2, $3) RETURNING *", [data.username, hashPassword, data.picture]);
+        const registeredUser = await pool.query("INSERT INTO users (username, password, picture) VALUES($1, $2, $3) RETURNING *", [data.username, hashPassword, data.picture]);
         res.json(registeredUser.rows[0]);
     } catch (error) {
         console.error(error);
@@ -38,7 +38,7 @@ const signin = async (req, res) => {
             return;
         }
 
-        const user = await pool.query("SELECT * FROM user WHERE username = $1", [data.username]);
+        const user = await pool.query("SELECT * FROM users WHERE username = $1", [data.username]);
 
         if (user.rows.length === 0) {
             res.status(404).send("Invalid username or password");
@@ -61,7 +61,7 @@ const signin = async (req, res) => {
 
 };
 
-const logout = async (req, res) => {
+const signout = async (req, res) => {
     try {
         res.clearCookie('token');
         res.status(200).send("Logged out success");
@@ -75,7 +75,7 @@ const getUser = async (req, res) => {
     try {
         
         const id = req.params["id"];
-        const user = await pool.query("SELECT * FROM user WHERE id = $1", [id]);
+        const user = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
 
         if (user.rows.length === 0) {
             res.status(404).send("No user found")
@@ -90,7 +90,7 @@ const getUser = async (req, res) => {
 
 const getAllUser = async (req, res) => {
     try {        
-        const users = await pool.query("SELECT * FROM user");
+        const users = await pool.query("SELECT * FROM users");
         res.json(users.rows)
     } catch (error) {
         console.error(error);
@@ -103,6 +103,11 @@ const updateUser = async (req, res) => {
     try {
         const id = req.params["id"];
         const data = req.body;
+
+        // if(req.user.id !== id) {
+        //     res.status(404);
+        //     return;
+        // }
 
         let updateCol;
         let updateVal;
@@ -118,7 +123,7 @@ const updateUser = async (req, res) => {
             updateVal = data.picture;
         }
 
-        const updatedUser = await pool.query(`UPDATE user SET ${updateCol} = $1 WHERE id = $2 RETURNING *` [updateVal, id]);
+        const updatedUser = await pool.query(`UPDATE users SET ${updateCol} = $1 WHERE id = $2 RETURNING *`, [updateVal, id]);
 
         if (updatedUser.rows.length === 0) {
             res.status(404).send("No user found");
@@ -136,7 +141,7 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
     try {
         const id = req.params["id"];
-        const deletedUser = await pool.query("DELETE FROM user WHERE id = $1 RETURNING *", [id]);
+        const deletedUser = await pool.query("DELETE FROM users WHERE id = $1 RETURNING *", [id]);
 
         if (deletedUser.rows.length === 0) {
             res.status(404).send("No user found");
@@ -150,3 +155,14 @@ const deleteUser = async (req, res) => {
     }
 };
 
+const userController = {
+    signup,
+    signin,
+    signout,
+    getUser,
+    getAllUser,
+    updateUser,
+    deleteUser
+};
+
+export default userController;
