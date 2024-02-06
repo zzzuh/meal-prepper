@@ -1,6 +1,10 @@
 import pool from "../config/database.js";
 
 const getMeal = async (req, res) => {
+    if (req.user.id != req.params["userID"]) {
+        res.status(404).send("You do not have permission")
+        return
+    }
     try {
         const userID = req.params["userID"];
         const mealID = req.params["mealID"];
@@ -34,15 +38,20 @@ const getAllMeal = async (req, res) => {
 };
 
 const createMeal = async (req, res) => {
+    if (req.user.id != req.params["userID"]) {
+        res.status(404).send("You do not have permission")
+        return
+    }
     try {
         const data = req.body;
+        const userID = req.params["userID"]
 
-        if (!data.user_id || !data.name) {
+        if (!data.name) {
             res.status(404).send("Error in making meal");
             return
         }
         const query = await pool.query("INSERT INTO meals (user_id, name, recipe, picture) VALUES($1, $2, $3, $4) RETURNING *", 
-        [data.user_id, data.name, data.recipe, data.picture])
+        [userID, data.name, data.recipe, data.picture])
 
         res.json(query.rows[0])
 
@@ -54,6 +63,10 @@ const createMeal = async (req, res) => {
 };
 
 const updateMeal = async (req, res) => {
+    if (req.user.id != req.params["userID"]) {
+        res.status(404).send("You do not have permission")
+        return
+    }
     try {
         
         const data = req.body
@@ -73,6 +86,10 @@ const updateMeal = async (req, res) => {
 };
 
 const deleteMeal = async (req, res) => {
+    if (req.user.id != req.params["userID"]) {
+        res.status(404).send("You do not have permission")
+        return
+    }
     try {
         const id = req.params["mealID"]
         const userID = req.params["userID"]
