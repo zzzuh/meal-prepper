@@ -25,9 +25,7 @@ const getMeal = async (req, res) => {
 
 const getAllMeal = async (req, res) => {
     try {
-        const userID = req.params["userID"];
-
-        const query = await pool.query("SELECT * FROM meals WHERE user_id = $1", [userID]);
+        const query = await pool.query("SELECT * FROM meals");
         res.json(query.rows);
         res.status(200);
 
@@ -103,7 +101,7 @@ const deleteMeal = async (req, res) => {
     }
 }
 
-mealController = {
+const mealController = {
     getMeal,
     getAllMeal,
     createMeal,

@@ -7,6 +7,8 @@ const signup = async (req, res) => {
     try {
         const data = req.body;
 
+        
+
         if (!data.username || !data.password) {
             res.status(404).send("Fields cannot be empty");
             return;
@@ -104,10 +106,11 @@ const updateUser = async (req, res) => {
         const id = req.params["id"];
         const data = req.body;
 
-        // if(req.user.id !== id) {
-        //     res.status(404);
-        //     return;
-        // }
+        if(req.user.id !== id) {
+            res.status(404).send("You do not have permission")
+            return;
+        }
+
 
         let updateCol;
         let updateVal;
